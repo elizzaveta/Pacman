@@ -4,19 +4,20 @@ import pygame.image
 """ information about game display """
 class DisplayInfo:
 
-    def __init__(self):
-        self.display_width = 780
-        self.display_height = 485
+    def __init__(self, height, width):
+        self.display_width = 26 + width * 38
+        self.display_height = 45 + height * 38
         self.pacman_width = 41
         self.pacman_height = 41
         self.ghost_height = 40
         self.ghost_width = 40
 
         self.speed = 38
+        self.score_y = self.display_height - 38
         self.pacman_x = 52 + 304 + 7
         self.pacman_y = 48 + 304 + 7
-        self.ghost_x = [48 + 266 + 6, 48 + 380 + 6]
-        self.ghost_y = [52+152+6, 52+152+6]
+        self.ghost_x = [48 + 266 + 6 + 38, 48 + 380 + 6 + 38*2]
+        self.ghost_y = [52+152+6 + 38*2, 52+152+6 + 38*2]
 
         self.agents_x = [52 + 304 + 7, 48 + 266 + 6, 48 + 380 + 6]
         self.agents_y = [48 + 304 + 7, 52+152+6, 52+152+6]

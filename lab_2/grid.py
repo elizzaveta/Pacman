@@ -1,11 +1,13 @@
 
 class Grid:
 
-    def __init__(self, width, height, walls, food):
+    def __init__(self, width, height, walls, food, food_amount):
         self.width = width
         self.height = height
         self.walls = walls
         self.food = food
+        self.food_amount = food_amount
+
 
     """ check if move from [x][y] is possible to given direction """
     def if_move_possible(self, x, y, direction):
@@ -24,10 +26,10 @@ class Grid:
 
     """ get how coords should be changed according to move direction """
     def dir_index(self, dir):
-        if dir =="left": return -1
+        if dir == "left": return -1
         if dir == "right": return 1
-        if dir == "up" : return -1
-        if dir == "down" : return 1
+        if dir == "up": return -1
+        if dir == "down": return 1
 
     """ get which coord (x or y) should be chacged according to move direction """
     def dir_x_or_y(self, dir):

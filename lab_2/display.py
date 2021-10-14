@@ -1,11 +1,15 @@
 import copy
 
 
+SPEED = 38
+
 class Display:
 
     """ draw game window: background, pacman, ghosts, food, score """
     def draw_window(self, win, grid, display_info, pacman, ghosts, pygame, score, path):
-        win.blit(display_info.background, (0, 0))
+        win.fill((0,0,0))
+
+        self.draw_generated_maze(win, pygame, grid.walls)
 
         self.draw_path_to_ghost(path[0], win, pygame, 0)
         self.draw_path_to_ghost(path[1], win, pygame, 1)
@@ -19,7 +23,7 @@ class Display:
         win.blit(self.get_ghost_direction_image(1, ghosts, display_info),
                  (display_info.ghost_x[1], display_info.ghost_y[1]))
 
-        self.draw_score(win, pygame, score)
+        self.draw_score(win, pygame, score, display_info)
 
 
         pygame.display.update()
@@ -72,11 +76,11 @@ class Display:
         return display_info.ghost_img_down[index]
 
     """ draw game score """
-    def draw_score(self, win, pygame, score):
+    def draw_score(self, win, pygame, score, display_info):
         text = "Score: " + str(score)
         font = pygame.font.SysFont('Comic Sans MS', 24, bold=pygame.font.Font.bold)
         letter1 = font.render(text, False, (255, 255, 0))
-        win.blit(letter1, (53, 430))
+        win.blit(letter1, (53, display_info.score_y))
 
     """ draw game over image and  game result"""
     def draw_game_over(self, win, display_info, pygame, if_win):
@@ -94,45 +98,33 @@ class Display:
 
         pygame.display.update()
 
-
-
-    def draw_generated_maze_only_dots(self,win,display_info, walls):
+    def draw_generated_maze(self,win, pygame, walls):
         walls_copy = copy.deepcopy(walls)
         for i in walls_copy:
             for j in i:
-                if walls_copy[walls_copy.index(i)][i.index(j)] is True:
-                    x = 41 + 29 + 38 * (walls_copy.index(i) - 1)
-                    y = 39 + 29 + 38 * (i.index(j) - 1)
-                    win.blit(display_info.food, (y, x, 4, 4))
-                    walls_copy[walls_copy.index(i)][i.index(j)] = False
-
-    def draw_generated_maze(self,win, pygame,display_info, walls):
-        walls_copy = copy.deepcopy(walls)
-        for i in walls_copy:
-            for j in i:
-                if walls_copy[walls_copy.index(i)][i.index(j)] is True:
+                if walls_copy[walls_copy.index(i)][i.index(j)] == '1':
                     x = 41 + 29 + 38 * (walls_copy.index(i) - 1)
                     y = 39 + 29 + 38 * (i.index(j) - 1)
 
                     dot = True
 
-                    if i.index(j)+1 < len(i) and walls_copy[walls_copy.index(i)][i.index(j)+1] is True:
-                        x1 = 41 + 29 + 38 * (walls_copy.index(i) - 1)
-                        y1 = 39 + 29 + 38 * (i.index(j))
+                    if i.index(j)+1 < len(i) and walls_copy[walls_copy.index(i)][i.index(j)+1] == '1':
                         dot = False
                         pygame.draw.rect(win, (64, 128, 255),(y, x, 38, 6))
-                    if walls_copy.index(i) +1 < len(walls) and walls_copy[walls_copy.index(i)+1][i.index(j)] is True:
+                    if walls_copy.index(i) +1 < len(walls) and walls_copy[walls_copy.index(i)+1][i.index(j)] == '1':
                         dot = False
                         pygame.draw.rect(win, (64, 128, 255), (y, x, 6, 38))
                     if dot:
-                        x1 = x +6
-                        y1 = y +6
                         pygame.draw.rect(win, (64, 128, 255), (y, x, 6, 6))
 
-                    walls_copy[walls_copy.index(i)][i.index(j)] = False
+                    walls_copy[walls_copy.index(i)][i.index(j)] = '0'
 
-    def draw_dead_end(self,win, display_info, dead_ends):
-        for end in dead_ends:
-            x = 41 + 29 + 38 * (end[0] - 1)
-            y = 39 + 29 + 38 * (end[1] - 1)
-            win.blit(display_info.food, (y, x, 4, 4))
+    def draw_food_copy(self, win, display_info, food):
+        food_copy = copy.deepcopy(food)
+        for line in food_copy:
+            for elem in line:
+                if (food_copy[food_copy.index(line)][line.index(elem)] == 1):
+                    y = 41 + 29 + 38 * (line.index(elem) - 1)
+                    x = 39 + 29 + 38 * (food_copy.index(line) - 1)
+                    win.blit(display_info.food, (y, x, 4, 4))
+                    food_copy[food_copy.index(line)][line.index(elem)] = 0

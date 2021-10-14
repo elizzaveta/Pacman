@@ -2,8 +2,6 @@ import time
 
 import pygame
 from layout import *
-from grid import *
-from additional_functions import *
 from agents import *
 from display import *
 from pacman_manager import *
@@ -12,16 +10,26 @@ from maze_generator import *
 import random
 import time
 
+MAZE_WIDTH = 23
+MAZE_HEIGHT = 13
+PACMAN_START = [9, 9]
+GHOST1_START = [7, 9]
+GHOST2_START = [7, 13]
 
+"""
+display_info ghost y x, pacman y x. make automatic
+"""
 
 class Game:
 
     def __init__(self):
-        self.pacman = Pacman(0, 9, 9)
+        self.pacman = Pacman(0, PACMAN_START[0], PACMAN_START[1])
         self.pacman_manager = PacmanManager()
-        self.ghosts = [Ghost(1, 5, 8), Ghost(2, 5, 11)]
-        self.grid = Grid(20, 11, read_2d_array("layout/walls.txt"), read_2d_array("layout/food.txt"))
-        self.display_info = DisplayInfo()
+        self.ghosts = [Ghost(1, GHOST1_START[0], GHOST1_START[1]), Ghost(2, GHOST2_START[0], GHOST2_START[1])]
+        self.maze_generator = MazeGenerator()
+        self.grid = self.maze_generator.get_generated_grid(MAZE_HEIGHT, MAZE_WIDTH)
+        # self.grid = Grid(20, 11, read_2d_array("layout/walls.txt"), read_2d_array("layout/food.txt"))
+        self.display_info = DisplayInfo(MAZE_HEIGHT, MAZE_WIDTH)
         self.display = Display()
         self.score = 0
         self.win = 0
@@ -55,15 +63,14 @@ class Game:
                 break
 
             algorithm = "ucs"
-
             path = self.run_path_algorithms_with_time(algorithm, 0)
             path2 = self.run_path_algorithms_with_time(algorithm, 1)
 
             """ make one ghosts move """
-            self.run_ghosts_on_path([path, path2])
+            # self.run_ghosts_on_path([path, path2])
+            self.run_ghosts()
 
-
-            self.display.draw_window(win, self.grid, self.display_info, self.pacman, self.ghosts, pygame, self.score, [path, path2])
+            self.display.draw_window(win, self.grid, self.display_info, self.pacman, self.ghosts, pygame, self.score, [[], []])
 
             if self.if_game_over():
                 break
@@ -78,10 +85,6 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False
-
-
-    # def current_milli_time(self):
-    #     return round(time.time() * 1000)
 
     def run_path_algorithms_with_time(self, algorithm, ghost_index):
         self.iterations += 1
@@ -125,7 +128,7 @@ class Game:
 
     """ check if game over """
     def if_game_over(self):
-        if self.score == 97:
+        if self.score == self.grid.food_amount:
             self.win = True
             return True
         if self.if_pacman_met_ghost():
@@ -141,18 +144,17 @@ class Game:
 
     """ one move of each ghost """
     def run_ghosts(self):
-        # for ghost in self.ghosts:
-        ghost = self.ghosts[1]
-        if True:
-            moved_to = self.ghosts[self.ghosts.index(ghost)].get_direction()
-            opposite_to = self.ghosts[self.ghosts.index(ghost)].get_opposite_direciton(moved_to)
-            directions = self.grid.get_possible_directions_for_move(self.ghosts[self.ghosts.index(ghost)].x,
-                                                                    self.ghosts[self.ghosts.index(ghost)].y)
-            if self.grid.if_move_possible(self.ghosts[self.ghosts.index(ghost)].x,
-                                              self.ghosts[self.ghosts.index(ghost)].y, moved_to):
-                directions.remove(opposite_to)
-            new_direction = random.choice(directions)
-            self.ghosts[self.ghosts.index(ghost)].move_to(new_direction, self.display_info, self.ghosts.index(ghost))
+        for ghost in self.ghosts:
+            if True:
+                moved_to = self.ghosts[self.ghosts.index(ghost)].get_direction()
+                opposite_to = self.ghosts[self.ghosts.index(ghost)].get_opposite_direciton(moved_to)
+                directions = self.grid.get_possible_directions_for_move(self.ghosts[self.ghosts.index(ghost)].x,
+                                                                        self.ghosts[self.ghosts.index(ghost)].y)
+                if self.grid.if_move_possible(self.ghosts[self.ghosts.index(ghost)].x,
+                                                  self.ghosts[self.ghosts.index(ghost)].y, moved_to):
+                    directions.remove(opposite_to)
+                new_direction = random.choice(directions)
+                self.ghosts[self.ghosts.index(ghost)].move_to(new_direction, self.display_info, self.ghosts.index(ghost))
 
     """ run ghosts according to found path """
     def run_ghosts_on_path(self, path):
@@ -163,7 +165,7 @@ class Game:
                                                                     self.ghosts[self.ghosts.index(ghost)].y)
             if len(directions) > 2 or moved_to not in directions:
                 current_path_index = path[self.ghosts.index(ghost)].index([ghost.x, ghost.y])
-                new_direction = self.get_direction([ghost.x, ghost.y],path[self.ghosts.index(ghost)][current_path_index-1])
+                new_direction = get_direction([ghost.x, ghost.y],path[self.ghosts.index(ghost)][current_path_index-1])
                 self.ghosts[self.ghosts.index(ghost)].move_to(new_direction, self.display_info, self.ghosts.index(ghost))
             else:
                 if self.grid.if_move_possible(self.ghosts[self.ghosts.index(ghost)].x,
@@ -175,16 +177,6 @@ class Game:
                                                               self.ghosts.index(ghost))
 
 
-
-    """ get direction in string format """
-    def get_direction(self, current_xy, new_xy):
-        if current_xy[0] - new_xy[0] == -1:
-            return "down"
-        if current_xy[0] - new_xy[0] == 1:
-            return "up"
-        if current_xy[1] - new_xy[1] == -1:
-            return "right"
-        return "left"
 
     """ one move of pacman """
     def run_pacman_fine(self):

@@ -1,8 +1,23 @@
 """ read arrays from text files """
-def read_2d_array(name): #pacman_grid.txt
+
+
+def read_2d_array(name):  # pacman_grid.txt
     with open(name) as textFile:
         lines = [line.split() for line in textFile]
     return lines
+
+
+""" get direction in string format """
+def get_direction(current_xy, new_xy):
+    if current_xy[0] - new_xy[0] < 0:
+        return "down"
+    if current_xy[0] - new_xy[0] > 0:
+        return "up"
+    if current_xy[1] - new_xy[1] < 0:
+        return "right"
+    return "left"
+
+
 
 
 

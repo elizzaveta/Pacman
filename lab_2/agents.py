@@ -3,8 +3,6 @@
 1 - ghost
 """
 
-
-
 class Agent:
 
     def __init__(self, player_ind, x, y):
@@ -63,11 +61,6 @@ class Agent:
         else:
             self.x += 1
             display_info.agents_y[ind] += 38
-
-
-
-
-
 
 class Ghost(Agent):
 
