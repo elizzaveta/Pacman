@@ -43,12 +43,18 @@ class MazeGenerator:
                 move_to = get_direction(current_xy, new_xy)
                 self.change_walls(current_xy, move_to)
                 self.dir = 1
+                if self.unvisited_points == 1:
+                    self.dir = 2
                 self.recursion_for_maze_gen(new_xy, height, width)
             else:
                 if self.dir == 1:
                     self.dead_end.append(current_xy)
                 self.dir = -1
                 break
+
+        if self.unvisited_points == 0 and self.dir == 2:
+            self.dir = 1
+            self.dead_end.append(current_xy)
 
     def remove_dead_ends(self, height, width):
         for end in self.dead_end:

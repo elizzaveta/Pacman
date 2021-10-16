@@ -7,6 +7,7 @@ from display import *
 from pacman_manager import *
 from search import *
 from maze_generator import *
+from a_star import *
 import random
 import time
 
@@ -18,6 +19,7 @@ GHOST2_START = [7, 13]
 
 """
 display_info ghost y x, pacman y x. make automatic
+game over photo
 """
 
 class Game:
@@ -46,6 +48,11 @@ class Game:
         pygame.init()
         win = pygame.display.set_mode((self.display_info.display_width, self.display_info.display_height))
         self.display.draw_window(win, self.grid, self.display_info, self.pacman, self.ghosts, pygame, self.score, [[], []])
+        nodes = self.grid.find_graph_nodes()
+        a_star = A_star(nodes, self.grid.walls)
+        # print(a_star.graph)
+
+        # self.display.draw_dead_end(win, pygame, nodes)
 
         run = True
         while run:
@@ -62,9 +69,9 @@ class Game:
             if self.if_game_over():
                 break
 
-            algorithm = "ucs"
-            path = self.run_path_algorithms_with_time(algorithm, 0)
-            path2 = self.run_path_algorithms_with_time(algorithm, 1)
+            # algorithm = "ucs"
+            # path = self.run_path_algorithms_with_time(algorithm, 0)
+            # path2 = self.run_path_algorithms_with_time(algorithm, 1)
 
             """ make one ghosts move """
             # self.run_ghosts_on_path([path, path2])
@@ -75,10 +82,11 @@ class Game:
             if self.if_game_over():
                 break
 
-        self.display.draw_game_over(win, self.display_info, pygame, self.win)
-        print("Average dfs time: ", self.overall_time_dfs/self.iterations)
-        print("Average bfs time: ", self.overall_time_bfs/self.iterations)
-        print("Average ucs time: ", self.overall_time_ucs/self.iterations)
+        # self.display.draw_game_over(win, self.display_info, pygame, self.win)
+
+        # print("Average dfs time: ", self.overall_time_dfs/self.iterations)
+        # print("Average bfs time: ", self.overall_time_bfs/self.iterations)
+        # print("Average ucs time: ", self.overall_time_ucs/self.iterations)
         while run:
             pygame.time.delay(100)
 

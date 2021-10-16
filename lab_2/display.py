@@ -128,3 +128,11 @@ class Display:
                     x = 39 + 29 + 38 * (food_copy.index(line) - 1)
                     win.blit(display_info.food, (y, x, 4, 4))
                     food_copy[food_copy.index(line)][line.index(elem)] = 0
+
+    def draw_dead_end(self, win, pygame, dead_ends):
+        for end in dead_ends:
+            x = 41 + 29 + 38 * (end[0] - 1)
+            y = 39 + 29 + 38 * (end[1] - 1)
+            pygame.draw.rect(win, (64, 0, 255), (y, x, 8, 8))
+
+        pygame.display.update()

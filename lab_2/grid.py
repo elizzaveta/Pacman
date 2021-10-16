@@ -1,3 +1,4 @@
+import copy
 
 class Grid:
 
@@ -48,6 +49,56 @@ class Grid:
         if self.walls[x-1][y] == '0':
             directions.append("up")
         if self.walls[x+1][y] == '0':
+            directions.append("down")
+        return directions
+
+    def if_directions_opposite(self, directions):
+        if len(directions) > 2:
+            return False
+
+        if "left" in directions and "right" in directions:
+            return True
+
+        if "up" in directions and "down" in directions:
+            return True
+
+        return False
+
+    def find_graph_nodes(self):
+        walls_copy = copy.deepcopy(self.walls)
+
+        nodes = []
+
+        y_in = [9, 10, 11, 12, 13]
+        y_in2 = [10, 11, 12]
+
+
+        for j in y_in2:
+            walls_copy[6][j] = '1'
+
+        for j in y_in:
+            walls_copy[7][j] = '1'
+
+        for line in walls_copy:
+            for elem in line:
+                if walls_copy[walls_copy.index(line)][line.index(elem)] == '0':
+                    directions = self.get_possible_directions_for_walls_copy(walls_copy.index(line), line.index(elem), 6)
+                    if (not self.if_directions_opposite(directions)) and walls_copy.index(line) != 0 and line.index(elem) != 0 and line.index(elem) != self.width and walls_copy.index(line) != self.height:
+                        nodes.append([walls_copy.index(line), line.index(elem)])
+                    walls_copy[walls_copy.index(line)][line.index(elem)] = '1'
+
+
+        return nodes
+
+    def get_possible_directions_for_walls_copy(self, x, y, home_enter_ind):
+        directions = []
+        if self.walls[x][y-1] == '0':
+            directions.append("left")
+        if self.walls[x][y+1] == '0':
+            directions.append("right")
+        if self.walls[x-1][y] == '0':
+            directions.append("up")
+        if self.walls[x+1][y] == '0' and (x+1 != home_enter_ind or y ==7 or y ==15):
             directions.append("down")
         return directions
 
