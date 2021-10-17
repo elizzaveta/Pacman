@@ -82,6 +82,11 @@ class Grid:
         for line in walls_copy:
             for elem in line:
                 if walls_copy[walls_copy.index(line)][line.index(elem)] == '0':
+
+                    x = walls_copy.index(line)
+                    y = line.index(elem)
+                    if x == 5 and y ==1:
+                        print("here")
                     directions = self.get_possible_directions_for_walls_copy(walls_copy.index(line), line.index(elem), 6)
                     if (not self.if_directions_opposite(directions)) and walls_copy.index(line) != 0 and line.index(elem) != 0 and line.index(elem) != self.width and walls_copy.index(line) != self.height:
                         nodes.append([walls_copy.index(line), line.index(elem)])
@@ -98,7 +103,7 @@ class Grid:
             directions.append("right")
         if self.walls[x-1][y] == '0':
             directions.append("up")
-        if self.walls[x+1][y] == '0' and (x+1 != home_enter_ind or y ==7 or y ==15):
+        if self.walls[x+1][y] == '0' and (x+1 != home_enter_ind and y !=10 or y !=11 and y != 12):
             directions.append("down")
         return directions
 

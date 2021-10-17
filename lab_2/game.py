@@ -52,7 +52,10 @@ class Game:
         a_star = A_star(nodes, self.grid.walls)
         # print(a_star.graph)
 
-        # self.display.draw_dead_end(win, pygame, nodes)
+
+        a_path = a_star.a_star_search(nodes[0], nodes[6], self.grid.food)
+
+        self.display.draw_dead_end(win, pygame, a_path)
 
         run = True
         while run:
@@ -76,6 +79,7 @@ class Game:
             """ make one ghosts move """
             # self.run_ghosts_on_path([path, path2])
             self.run_ghosts()
+
 
             self.display.draw_window(win, self.grid, self.display_info, self.pacman, self.ghosts, pygame, self.score, [[], []])
 
