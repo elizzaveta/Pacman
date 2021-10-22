@@ -107,3 +107,12 @@ class Grid:
             directions.append("down")
         return directions
 
+    def close_house(self, pacman_xy, ghost1_xy, ghost2_xy):
+        house_xy = [[6, 10], [6, 11], [6, 12], [7, 9], [7, 10], [7, 11], [7, 12], [7, 13]]
+
+        if pacman_xy not in house_xy and ghost1_xy not in house_xy and ghost2_xy not in house_xy:
+            self.walls[6][10] = '1'
+            self.walls[6][11] = '1'
+            self.walls[6][12] = '1'
+            return True
+        return False

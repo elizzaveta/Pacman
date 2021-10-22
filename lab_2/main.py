@@ -1,12 +1,9 @@
 from game import *
+from lab3_game import *
 
 if __name__ == '__main__':
     game = Game()
+    # game = Game_lab3()
     game.run()
-
-    # string = '[11, 4]'
-    # print( string[1:-1])
-    # print(string[1:-1].split(',')[0])
-
 
 

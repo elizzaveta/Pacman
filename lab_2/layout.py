@@ -14,8 +14,8 @@ class DisplayInfo:
 
         self.speed = 38
         self.score_y = self.display_height - 38
-        self.pacman_x = 52 + 304 + 7
-        self.pacman_y = 48 + 304 + 7
+        self.pacman_x = 52 + 304 + 7 -38*8
+        self.pacman_y = 48 + 304 + 7 - 38*8
         self.ghost_x = [48 + 266 + 6 + 38, 48 + 380 + 6 + 38*2]
         self.ghost_y = [52+152+6 + 38*2, 52+152+6 + 38*2]
 
@@ -23,7 +23,7 @@ class DisplayInfo:
         self.agents_y = [48 + 304 + 7, 52+152+6, 52+152+6]
 
         self.background = pygame.image.load("sprites/map.jpeg")
-        self.game_over_img = pygame.image.load("sprites/game_over.png")
+        self.game_over_img = pygame.image.load("sprites/game_over_sm.png")
         self.food = pygame.image.load("sprites/food.png")
         self.b_food = pygame.image.load("sprites/big food.png")
 

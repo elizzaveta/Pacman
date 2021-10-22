@@ -6,13 +6,18 @@ SPEED = 38
 class Display:
 
     """ draw game window: background, pacman, ghosts, food, score """
-    def draw_window(self, win, grid, display_info, pacman, ghosts, pygame, score, path):
+    def draw_window(self, win, grid, display_info, pacman, ghosts, pygame, score, path, nodes):
+        if nodes is None:
+            nodes = []
+        if path is None:
+            path = [[], []]
         win.fill((0,0,0))
 
         self.draw_generated_maze(win, pygame, grid.walls)
 
         self.draw_path_to_ghost(path[0], win, pygame, 0)
         self.draw_path_to_ghost(path[1], win, pygame, 1)
+        self.draw_dead_end(win, pygame, nodes)
 
         self.draw_food(win, grid, display_info)
 
@@ -29,10 +34,10 @@ class Display:
         pygame.display.update()
 
     def draw_path_to_ghost(self, path, win, pygame, ind):
-        if len(path) > 2:
-            path.pop()
-            path.pop()
-            path.pop(0)
+        # if len(path) > 2:
+        #     path.pop()
+        #     path.pop()
+        #     path.pop(0)
 
         for point in path:
             y = 41 + 26 + 38 * (point[1]-1)
@@ -84,7 +89,8 @@ class Display:
 
     """ draw game over image and  game result"""
     def draw_game_over(self, win, display_info, pygame, if_win):
-        win.blit(display_info.game_over_img, (0, 0))
+        win.fill((17, 14, 61))
+        win.blit(display_info.game_over_img, ((display_info.display_width-331)/2, (display_info.display_height-137)/2))
 
         text = "You "
         if if_win:
@@ -94,7 +100,7 @@ class Display:
 
         font = pygame.font.SysFont('Comic Sans MS', 24, bold=pygame.font.Font.bold)
         letter1 = font.render(text, False, (255, 255, 0))
-        win.blit(letter1, (320, 350))
+        win.blit(letter1, ((display_info.display_width-120)/2, (display_info.display_height+137)/2))
 
         pygame.display.update()
 
@@ -133,6 +139,6 @@ class Display:
         for end in dead_ends:
             x = 41 + 29 + 38 * (end[0] - 1)
             y = 39 + 29 + 38 * (end[1] - 1)
-            pygame.draw.rect(win, (64, 0, 255), (y, x, 8, 8))
+            pygame.draw.rect(win, (240, 0, 0), (y, x, 8, 8))
 
         pygame.display.update()
