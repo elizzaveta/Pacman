@@ -27,6 +27,7 @@ class Game:
         self.ghosts = [Ghost(1, GHOST1_START[0], GHOST1_START[1]), Ghost(2, GHOST2_START[0], GHOST2_START[1])]
         self.maze_generator = MazeGenerator()
         self.grid = self.maze_generator.get_generated_grid(MAZE_HEIGHT, MAZE_WIDTH)
+        self.grid.food[PACMAN_START[0]][PACMAN_START[1]] = '0'
         # self.grid = Grid(20, 11, read_2d_array("layout/walls.txt"), read_2d_array("layout/food.txt"))
         self.display_info = DisplayInfo(MAZE_HEIGHT, MAZE_WIDTH)
         self.display = Display()
@@ -99,7 +100,7 @@ class Game:
 
     def set_pacman_path_through_n_dots(self, n, heuristic):
         if self.pacman_in_move == 0:
-            nodes = self.grid.find_graph_nodes()
+            nodes = self.get_all_food_nodes()
             if [self.pacman.x, self.pacman.y] in nodes:
                 nodes.pop(nodes.index([self.pacman.x, self.pacman.y]))
             nodes_1 = self.random_n_dots(nodes, n)
@@ -198,7 +199,7 @@ class Game:
 
     """ check if game over """
     def if_game_over(self):
-        if self.score == self.grid.food_amount:
+        if self.score+1 == self.grid.food_amount:
             self.win = True
             return True
         if self.if_pacman_met_ghost():
@@ -305,7 +306,15 @@ class Game:
         return path
 
 
-
+    def get_all_food_nodes(self):
+        nodes = []
+        food = copy.deepcopy(self.grid.food)
+        for line in food:
+            for elem in line:
+                if elem == '1':
+                    nodes.append([food.index(line), line.index(elem)])
+                    food[food.index(line)][ line.index(elem)] = '0'
+        return nodes
 
 
 
