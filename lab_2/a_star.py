@@ -2,16 +2,6 @@ import copy
 from math import sqrt
 from additional_functions import *
 
-
-class Node:
-
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-        self.adjacent = []
-        self.is_visited = 0
-
-
 # now graph is stored in a dictionary. key is graph node and value is a list of adjacent nodes
 class A_star:
 
@@ -63,7 +53,7 @@ class A_star:
                 if food[x][y] == '1':
                     cost += 1
                 else:
-                    cost += 54
+                    cost += 4
         else:
             while x != new_xy[0]:
                 if direction == "down":
@@ -73,36 +63,13 @@ class A_star:
                 if food[x][y] == '1':
                     cost += 1
                 else:
-                    cost += 54
+                    cost += 4
 
         return cost
 
-    def a_star_search(self, start_xy, end_xy, food,walls, heuristic):
-        open_nodes = []
-        closed_nodes = []
-        nodes_info = {}
-        current_xy = start_xy
-        f = 0 + self.get_heuristic(heuristic, start_xy, end_xy, walls)
-        nodes_info[str(start_xy)] = [f, []]
-
-        while current_xy != end_xy:
-            adjacent = self.graph[str(current_xy)]
-            for node in adjacent:
-                node_g = self.get_g_value(current_xy, node, start_xy, nodes_info, food)  # Calculate distance from start
-                node_h = self.get_heuristic(heuristic, node, end_xy, walls)
-                node_f = node_g + node_h
-                if node not in open_nodes and node not in closed_nodes:
-                    open_nodes.append(node)
-                    nodes_info[str(node)] = [node_f, current_xy]
-
-                if node_f <= f:
-                    f = node_f
-                    nodes_info[str(node)] = [node_f, current_xy]
-            closed_nodes.append(current_xy)
-            current_xy = self.find_new_current_from_open(open_nodes, nodes_info)
-            open_nodes.pop(open_nodes.index(current_xy))
-        return self.find_back_path(nodes_info, end_xy, start_xy)
-
+    """ a star algorithm to find path from start_xy across all end nodes (n_end_xy) """
+    """ using given heuristic parameter """
+    """ if given one end node - classic a star alg """
     def a_star_search_n_dots(self, start_xy, n_end_xy, food, walls, heuristic):
         path = []
         current_xy = start_xy
@@ -111,7 +78,6 @@ class A_star:
             start_xy = current_xy
             n_end_xy = self.orderer_n_dots(n_end_xy, start_xy)
             end_xy = n_end_xy.pop(0)
-            print("start: ", start_xy, " end: ", end_xy)
             open_nodes = []
             closed_nodes = []
             nodes_info = {}
@@ -141,7 +107,7 @@ class A_star:
 
         return path
 
-
+    """ order end nodes according to heuristic value """
     def orderer_n_dots(self, n_end_xy, start_xy):
         h_arr = []
         sorted = []
@@ -155,6 +121,7 @@ class A_star:
             sorted.append(n_end_xy[index])
         return sorted
 
+    """ for a star: get weight between nodes """
     def get_g_value(self, current_xy, node, start_xy, nodes_info, food):
         g = 0
         g += self.get_cost_from_node_to_node(current_xy, node, food)
@@ -166,6 +133,7 @@ class A_star:
             current_xy = parent
         return g
 
+    """ for a star: find node for next move from open nodes with minimal path value """
     def find_new_current_from_open(self, open_nodes, nodes_info):
         nodes_info_copy = copy.deepcopy(nodes_info)
         new_current = []
@@ -181,6 +149,7 @@ class A_star:
                 found = True
         return new_current
 
+    """ get estimated heuristic value """
     def get_heuristic(self, method, current_xy, end_xy, walls):
         if method == "manhattan":
             return abs(current_xy[0] - end_xy[0]) + abs(current_xy[1] - end_xy[1])
@@ -191,7 +160,7 @@ class A_star:
         elif method == "s opt":
             return (abs(current_xy[0] - end_xy[0]) + abs(current_xy[1] - end_xy[1]) + self.count_walls_between_nodes(copy.deepcopy(current_xy), copy.deepcopy(end_xy), walls))
 
-
+    """ estimate how many walls is on line from node to node """
     def count_walls_between_nodes(self, node1_xy, node2_xy, walls):
         x = abs(node1_xy[0] - node2_xy[0])
         y = abs(node1_xy[1] - node2_xy[1])
@@ -204,8 +173,6 @@ class A_star:
             node1_xy[0] = int(x/2)
             node2_xy[0] = int(x/2)
         return self.count_walls_on_line(node1_xy, node2_xy, walls)
-
-
 
     def count_walls_on_line(self, node1_xy, node2_xy, walls):
         n_walls = 0
@@ -228,7 +195,7 @@ class A_star:
                 x1 +=1
         return n_walls
 
-
+    """ get found path """
     def find_back_path(self, nodes_info, end_xy, start_xy):
         path = [end_xy]
         current_xy = nodes_info[str(end_xy)][1]
@@ -237,3 +204,35 @@ class A_star:
             current_xy = nodes_info[str(current_xy)][1]
         path.append(current_xy)
         return path
+
+
+
+
+
+
+    # old version
+    def a_star_search(self, start_xy, end_xy, food,walls, heuristic):
+        open_nodes = []
+        closed_nodes = []
+        nodes_info = {}
+        current_xy = start_xy
+        f = 0 + self.get_heuristic(heuristic, start_xy, end_xy, walls)
+        nodes_info[str(start_xy)] = [f, []]
+
+        while current_xy != end_xy:
+            adjacent = self.graph[str(current_xy)]
+            for node in adjacent:
+                node_g = self.get_g_value(current_xy, node, start_xy, nodes_info, food)  # Calculate distance from start
+                node_h = self.get_heuristic(heuristic, node, end_xy, walls)
+                node_f = node_g + node_h
+                if node not in open_nodes and node not in closed_nodes:
+                    open_nodes.append(node)
+                    nodes_info[str(node)] = [node_f, current_xy]
+
+                if node_f <= f:
+                    f = node_f
+                    nodes_info[str(node)] = [node_f, current_xy]
+            closed_nodes.append(current_xy)
+            current_xy = self.find_new_current_from_open(open_nodes, nodes_info)
+            open_nodes.pop(open_nodes.index(current_xy))
+        return self.find_back_path(nodes_info, end_xy, start_xy)

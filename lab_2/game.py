@@ -43,7 +43,6 @@ class Game:
         self.pacman_in_move = 0
         self.pacman_path = []
         self.pacman_graph_path = []
-        self.pacman_destination = []
         self.a_star = None
         self.corner_nodes = [[1,MAZE_WIDTH-2],[MAZE_HEIGHT-2,1],[MAZE_HEIGHT-2,MAZE_WIDTH-2],[1,1],[MAZE_HEIGHT-2,1],[1,MAZE_WIDTH-2],[MAZE_HEIGHT-2,MAZE_WIDTH-2],[1,1]]
 
@@ -63,13 +62,15 @@ class Game:
                     run = False
 
 
-            self.set_pacman_path_through_n_dots(0, "manhattan")
-
+            """ make one pacman move """
+            # n = 0 if need to visit all nodes
+            # n = -1 if need to visit all food
+            # n is the number of dots to add to pacman's path
+            self.set_pacman_path_through_n_dots(1, "manhattan")
 
             if [self.pacman.x, self.pacman.y] in self.pacman_graph_path:
                 self.pacman_graph_path.remove([self.pacman.x, self.pacman.y])
 
-            """ make one pacman move """
             self.run_pacman_on_path()
 
 
@@ -98,104 +99,7 @@ class Game:
                 if event.type == pygame.QUIT:
                     run = False
 
-    def set_pacman_path_through_n_dots(self, n, heuristic):
-        if self.pacman_in_move == 0:
-            nodes = self.get_all_food_nodes()
-            if [self.pacman.x, self.pacman.y] in nodes:
-                nodes.pop(nodes.index([self.pacman.x, self.pacman.y]))
-            nodes_1 = self.random_n_dots(nodes, n)
-            if n ==0: nodes_1 = copy.deepcopy(nodes)
-            self.pacman_graph_path = copy.deepcopy(nodes_1)
-            self.pacman_destination = self.get_corner_node()
-            nodes.append([self.pacman.x, self.pacman.y])
-            self.a_star = A_star(nodes, self.grid.walls)
-            a_path = self.a_star.a_star_search_n_dots([self.pacman.x, self.pacman.y], nodes_1,
-                                                      copy.deepcopy(self.grid.food), self.grid.walls, heuristic)
-            self.pacman_path = self.make_path_from_graph_path(a_path)
-            self.pacman_in_move = 1
-            print("dots: ", nodes_1)
-            print("path: ", self.pacman_path)
 
-    def close_house(self):
-        if not self.house_closed:
-            closed = self.grid.close_house([self.pacman.x, self.pacman.y], [self.ghosts[0].x, self.ghosts[0].y],
-                                           [self.ghosts[1].x, self.ghosts[1].y])
-            if closed:
-                self.house_closed = True
-
-    def random_n_dots(self, nodes, n):
-        nodes_copy = copy.deepcopy(nodes)
-        n_dots = []
-        for i in range(n):
-            n_dots.append(random.choice(nodes_copy))
-            nodes_copy.pop(nodes_copy.index(n_dots[i]))
-        return n_dots
-
-    def get_corner_node(self):
-        node = self.corner_nodes[0]
-        self.corner_nodes.pop(0)
-        self.corner_nodes.append(node)
-        return node
-
-    def run_a_star(self, win):
-        if self.house_closed:
-            nodes = self.grid.find_graph_nodes()
-            nodes.append([self.pacman.x, self.pacman.y])
-            nodes.append([self.ghosts[0].x, self.ghosts[0].y])
-            nodes.append([self.ghosts[1].x, self.ghosts[1].y])
-            a_star = A_star(nodes, self.grid.walls)
-            # "manhattan" "euclidean" "greedy"
-            a_path1 = a_star.a_star_search([self.pacman.x, self.pacman.y], [self.ghosts[0].x, self.ghosts[0].y],
-                                           self.grid.food, "manhattan")
-            a_path2 = a_star.a_star_search([self.pacman.x, self.pacman.y], [self.ghosts[1].x, self.ghosts[1].y],
-                                           self.grid.food, "greedy")
-            path1 = self.make_path_from_graph_path(a_path1)
-            path2 = self.make_path_from_graph_path(a_path2)
-
-            self.display.draw_dead_end(win, pygame, path1)
-            self.run_ghosts_on_path([path1, path2])
-        else:
-            self.run_ghosts()
-
-    def run_path_algorithms_with_time(self, algorithm, ghost_index):
-        self.iterations += 1
-
-        start = time.time()
-        dfs_path = self.path_search_manager("dfs", ghost_index)
-        self.overall_time_dfs += time.time() - start
-        start = time.time()
-        bfs_path = self.path_search_manager("bfs", ghost_index)
-        self.overall_time_bfs += time.time() - start
-
-        start = time.time()
-        ucs_path = self.path_search_manager("ucs", ghost_index)
-        self.overall_time_ucs += time.time() - start
-
-        if algorithm == "dfs":
-            return dfs_path
-        if algorithm == "bfs":
-            return bfs_path
-        return ucs_path
-
-
-
-    """ get path using given algorithm to the ghost """
-    def path_search_manager(self, algorithm, ghost_index):
-        if algorithm == "dfs":
-            return dfs(self.grid.walls, [self.pacman.x, self.pacman.y], [self.ghosts[ghost_index].x, self.ghosts[ghost_index].y])
-
-        if algorithm == "bfs":
-            return bfs(self.grid.walls, [self.pacman.x, self.pacman.y], [self.ghosts[ghost_index].x, self.ghosts[ghost_index].y])
-
-        return ucs(self.grid.walls, self.grid.food, [self.pacman.x, self.pacman.y],
-                   [self.ghosts[ghost_index].x, self.ghosts[ghost_index].y])
-
-
-    """ change game state according to one pacman move """
-    def one_move(self, direction):
-        self.score += int(self.grid.food[self.pacman.x][self.pacman.y])
-        self.grid.food[self.pacman.x][self.pacman.y] = '0'
-        self.pacman.change_direction(direction)
 
     """ check if game over """
     def if_game_over(self):
@@ -212,6 +116,44 @@ class Game:
         for ghost in self.ghosts:
             if self.pacman.x == self.ghosts[ghost.player - 1].x and self.pacman.y == self.ghosts[ghost.player - 1].y:
                 return True
+
+
+
+    """ run pacman along n randomly chosen nodes using a_star alrorithm with given heuristic """
+    def set_pacman_path_through_n_dots(self, n, heuristic):
+        if self.pacman_in_move == 0:
+            nodes = self.grid.find_graph_nodes()
+            if n == -1: nodes = self.get_all_food_nodes()
+            if [self.pacman.x, self.pacman.y] in nodes:
+                nodes.pop(nodes.index([self.pacman.x, self.pacman.y]))
+            nodes_1 = self.random_n_dots(nodes, n)
+            if n <= 0: nodes_1 = copy.deepcopy(nodes)
+            self.pacman_graph_path = copy.deepcopy(nodes_1)
+            nodes.append([self.pacman.x, self.pacman.y])
+            self.a_star = A_star(nodes, self.grid.walls)
+            a_path = self.a_star.a_star_search_n_dots([self.pacman.x, self.pacman.y], nodes_1,
+                                                      copy.deepcopy(self.grid.food), self.grid.walls, heuristic)
+            self.pacman_path = self.make_path_from_graph_path(a_path)
+            self.pacman_in_move = 1
+
+
+    """ get n randomly chosen nodes from graph nodes array """
+    def random_n_dots(self, nodes, n):
+        nodes_copy = copy.deepcopy(nodes)
+        n_dots = []
+        for i in range(n):
+            n_dots.append(random.choice(nodes_copy))
+            nodes_copy.pop(nodes_copy.index(n_dots[i]))
+        return n_dots
+
+
+
+    """ change game state according to one pacman move """
+    def one_move(self, direction):
+        self.score += int(self.grid.food[self.pacman.x][self.pacman.y])
+        self.grid.food[self.pacman.x][self.pacman.y] = '0'
+        self.pacman.change_direction(direction)
+
 
     """ one move of each ghost """
     def run_ghosts(self):
@@ -249,7 +191,7 @@ class Game:
 
 
 
-    """ one move of pacman """
+    """ one move of pacman when controlling from the keyboard """
     def run_pacman_fine(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
@@ -263,6 +205,7 @@ class Game:
 
         self.pacman_manager.move_pacman(self, self.pacman, self.grid, self.display_info)
 
+    """ one move of pacman according to found path """
     def run_pacman_on_path(self):
         current_xy = self.pacman_path[0]
         new_xy = self.pacman_path[1]
@@ -316,7 +259,69 @@ class Game:
                     food[food.index(line)][ line.index(elem)] = '0'
         return nodes
 
+    """ close ghosts house when no agents there """
+    def close_house(self):
+        if not self.house_closed:
+            closed = self.grid.close_house([self.pacman.x, self.pacman.y], [self.ghosts[0].x, self.ghosts[0].y],
+                                           [self.ghosts[1].x, self.ghosts[1].y])
+            if closed:
+                self.house_closed = True
 
+    """ run ghosts with a star alg"""
+
+    def run_a_star(self, win):
+        if self.house_closed:
+            nodes = self.grid.find_graph_nodes()
+            nodes.append([self.pacman.x, self.pacman.y])
+            nodes.append([self.ghosts[0].x, self.ghosts[0].y])
+            nodes.append([self.ghosts[1].x, self.ghosts[1].y])
+            a_star = A_star(nodes, self.grid.walls)
+            # "manhattan" "euclidean" "greedy"
+            a_path1 = a_star.a_star_search([self.pacman.x, self.pacman.y], [self.ghosts[0].x, self.ghosts[0].y],
+                                           self.grid.food, "manhattan")
+            a_path2 = a_star.a_star_search([self.pacman.x, self.pacman.y], [self.ghosts[1].x, self.ghosts[1].y],
+                                           self.grid.food, "greedy")
+            path1 = self.make_path_from_graph_path(a_path1)
+            path2 = self.make_path_from_graph_path(a_path2)
+
+            self.display.draw_dead_end(win, pygame, path1)
+            self.run_ghosts_on_path([path1, path2])
+        else:
+            self.run_ghosts()
+
+
+
+    # lab1
+    def run_path_algorithms_with_time(self, algorithm, ghost_index):
+        self.iterations += 1
+
+        start = time.time()
+        dfs_path = self.path_search_manager("dfs", ghost_index)
+        self.overall_time_dfs += time.time() - start
+        start = time.time()
+        bfs_path = self.path_search_manager("bfs", ghost_index)
+        self.overall_time_bfs += time.time() - start
+
+        start = time.time()
+        ucs_path = self.path_search_manager("ucs", ghost_index)
+        self.overall_time_ucs += time.time() - start
+
+        if algorithm == "dfs":
+            return dfs_path
+        if algorithm == "bfs":
+            return bfs_path
+        return ucs_path
+
+    """ get path using given algorithm to the ghost """
+    def path_search_manager(self, algorithm, ghost_index):
+        if algorithm == "dfs":
+            return dfs(self.grid.walls, [self.pacman.x, self.pacman.y], [self.ghosts[ghost_index].x, self.ghosts[ghost_index].y])
+
+        if algorithm == "bfs":
+            return bfs(self.grid.walls, [self.pacman.x, self.pacman.y], [self.ghosts[ghost_index].x, self.ghosts[ghost_index].y])
+
+        return ucs(self.grid.walls, self.grid.food, [self.pacman.x, self.pacman.y],
+                   [self.ghosts[ghost_index].x, self.ghosts[ghost_index].y])
 
 
 
