@@ -1,4 +1,5 @@
 import copy
+import random
 
 class Grid:
 
@@ -50,6 +51,7 @@ class Grid:
             directions.append("up")
         if self.walls[x+1][y] == '0':
             directions.append("down")
+        random.shuffle(directions)
         return directions
 
     def if_directions_opposite(self, directions):

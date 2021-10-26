@@ -11,6 +11,7 @@ from maze_generator import *
 from statistics import *
 from a_star import *
 from minimax import *
+from expectimax import *
 import random
 
 
@@ -25,13 +26,13 @@ GHOST4_START = [7, 12]
 
 class Game:
 
-    def __init__(self, num_of_ghosts_type1, num_of_ghosts):
+    def __init__(self, num_of_ghosts_type1, num_of_ghosts, alg):
         self.pacman = Pacman(0, PACMAN_START[0], PACMAN_START[1])
         self.pacman_manager = PacmanManager()
         self.ghosts = self.init_ghosts(num_of_ghosts_type1, num_of_ghosts)
         self.maze_generator = MazeGenerator()
         self.grid = self.maze_generator.get_generated_grid(MAZE_HEIGHT, MAZE_WIDTH)
-        self.minimax = Minimax(self.grid.food_amount, self.grid)
+        self.grid.food[PACMAN_START[0]][PACMAN_START[1]]= '0'
         # self.grid = Grid(20, 11, read_2d_array("layout/walls.txt"), read_2d_array("layout/food.txt"))
         self.display_info = DisplayInfo(MAZE_HEIGHT, MAZE_WIDTH)
         self.display = Display()
@@ -40,9 +41,11 @@ class Game:
         self.win = 0
         self.keys_pressed = []
         self.house_closed = False
-        self.algorithm = "alpha-beta"
+        self.algorithm = alg
         self.prev = [[1, 1], [1, 1]]
+        self.minimax = Minimax(self.grid.food_amount, self.grid, alg, 0.5)
 
+    """ initiate ghosts according to given parameters """
     def init_ghosts(self, num_of_ghosts_type1, num_of_ghosts):
         if num_of_ghosts_type1 > 4: num_of_ghosts_type1 = 4
         start_pos = [GHOST1_START, GHOST2_START, GHOST3_START, GHOST4_START]
@@ -88,9 +91,22 @@ class Game:
             """ make one pacman move """
             # self.run_pacman_fine()
 
-
+            ghosts_xy =[]
+            for ghost in self.ghosts:
+                ghosts_xy.append([ghost.x, ghost.y])
             prev = self.prev.pop(0)
-            p_xy = self.minimax.run(self, prev)
+            p_dir = self.minimax.run( prev, self )
+            p_xy = []
+
+            if p_dir == "left":
+                p_xy = [self.pacman.x, self.pacman.y-1]
+            if p_dir == "right":
+                p_xy = [self.pacman.x, self.pacman.y+1]
+            if p_dir == "up":
+                p_xy = [self.pacman.x-1, self.pacman.y]
+            if p_dir == "down":
+                p_xy = [self.pacman.x+1, self.pacman.y]
+
             self.prev.append(p_xy)
             self.run_pacman_on_path([[self.pacman.x, self.pacman.y], p_xy])
 
@@ -120,7 +136,7 @@ class Game:
 
     """ check if game over """
     def if_game_over(self):
-        if self.score == self.grid.food_amount:
+        if self.score == self.grid.food_amount-1:
             self.win = True
             return True
         if self.if_pacman_met_ghost():
