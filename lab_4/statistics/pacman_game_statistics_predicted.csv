@@ -1,0 +1,6 @@
+Game result,Time,Score,Algorithm
+Lose,0.7335481643676758,47,alpha-beta
+Lose,0.3342976570129394,31,alpha-beta
+Lose,1.705185890197754,88,alpha-beta
+Lose,0.8344283103942871,51,alpha-beta
+Win,1.896283864974976,96,alpha-beta
