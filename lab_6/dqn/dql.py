@@ -1,15 +1,8 @@
-import time
 from itertools import count
-import matplotlib.pyplot as plt
-import torch
 
 from training import *
 from input_extraction import *
-from training_loop import *
 from result_csv import *
-
-#
-# Game here
 
 pygame.init()
 game = Game()
@@ -29,10 +22,8 @@ plt.show()
 
 
 
-num_episodes = 300
+num_episodes = 100
 for i_episode in range(num_episodes):
-    # Initialize the environment and state
-
     print("game ", i_episode,", Score: ", game.score)
     start_time = time.time()
     game.reset()
@@ -61,7 +52,6 @@ for i_episode in range(num_episodes):
 
         reward = torch.tensor([reward], device=device)
 
-        # Observe new state
         last_screen = current_screen
         current_screen = get_screen()
         if not done:
@@ -69,23 +59,18 @@ for i_episode in range(num_episodes):
         else:
             next_state = None
 
-        # Store the transition in memory
         memory.push(state, action, next_state, reward)
 
-        # Move to the next state
         state = next_state
 
-        # Perform one step of the optimization (on the policy network)
         optimize_model()
         if done:
             episode_durations.append(t + 1)
-            plot_durations()
             scores.append(game.score)
             break
 
     result_csv.add_statistics(i_episode, game.score,time.time() - start_time )
 
-    # Update the target network, copying all weights and biases in DQN
     if i_episode % TARGET_UPDATE == 0:
         target_net.load_state_dict(policy_net.state_dict())
 
